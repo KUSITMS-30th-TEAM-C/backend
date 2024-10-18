@@ -8,6 +8,12 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -27,23 +33,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: YML 파일 세팅
-        env:
-          APPLICATION_PROPERTIES: ${{ secrets.APPLICATION_PROPERTIES }}
-          TEST_APPLICATION_PROPERTIES: ${{ secrets.TEST_APPLICATION_PROPERTIES }}
-        run: |
-          cd ./src
-          rm -rf main/resources/application.yml
-          mkdir -p test/resources
-          echo "$APPLICATION_PROPERTIES" > main/resources/application.yml
-          echo "$TEST_APPLICATION_PROPERTIES" > test/resources/application.yml
-
-      - name: gradlew 권한 부여
-        run: chmod +x gradlew
-
-      - name: 테스트 수행
-        run: ./gradlew test
 
       - name: 스프링부트 빌드
         run: ./gradlew build
@@ -68,8 +57,10 @@ jobs:
           tags: ${{ secrets.NCP_CONTAINER_REGISTRY }}/cnergy-backend:${{ github.sha }}
           platforms: linux/amd64,linux/arm64
 
-      - name: NCP 접속 후 이미지 다운로드 및 배포
-        if: success()
+      - name: Docker Compose 파일 NCP 서버로 전송
+        run: scp -o StrictHostKeyChecking=no -P ${{ secrets.NCP_PORT }} docker-compose.yml ${{ secrets.NCP_USERNAME }}@${{ secrets.NCP_HOST }}:./
+
+      - name: NCP 접속 후 배포
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.NCP_HOST }}
@@ -77,7 +68,6 @@ jobs:
           password: ${{ secrets.NCP_PASSWORD }}
           port: ${{ secrets.NCP_PORT }}
           script: |
-            docker pull ${{ secrets.NCP_CONTAINER_REGISTRY }}/cnergy-backend:${{ github.sha }}
             sudo chmod +x ./deploy.sh
             export NCP_CONTAINER_REGISTRY=${{ secrets.NCP_CONTAINER_REGISTRY }}
             export GITHUB_SHA=${{ github.sha }}

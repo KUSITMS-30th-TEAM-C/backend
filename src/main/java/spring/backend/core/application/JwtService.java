@@ -35,11 +35,13 @@ public class JwtService {
     private final SecretKey SECRET_KEY;
     private final long ACCESS_EXPIRATION;
     private final long REFRESH_EXPIRATION;
+    private final RedisService redisService;
 
-    public JwtService(@Value("${jwt.secret}") String secret, @Value("${jwt.access-token-expiry}") long accessTokenExpiry, @Value("${jwt.refresh-token-expiry}") long refreshTokenExpiry) {
+    public JwtService(@Value("${jwt.secret}") String secret, @Value("${jwt.access-token-expiry}") long accessTokenExpiry, @Value("${jwt.refresh-token-expiry}") long refreshTokenExpiry, RedisService redisService) {
         this.SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.ACCESS_EXPIRATION = accessTokenExpiry;
         this.REFRESH_EXPIRATION = refreshTokenExpiry;
+        this.redisService = redisService;
     }
 
     public String provideAccessToken(Member member) {
@@ -52,12 +54,16 @@ public class JwtService {
     }
 
     public String provideRefreshToken(Member member) {
-        return provideToken(
+        String refreshToken = provideToken(
                 member.getEmail(),
                 member.getId(),
                 Type.REFRESH,
                 REFRESH_EXPIRATION
         );
+
+        redisService.saveRefreshToken(member.getId(), refreshToken, REFRESH_EXPIRATION, ChronoUnit.DAYS);
+
+        return refreshToken;
     }
 
     public Claims getPayload(String token) {
