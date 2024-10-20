@@ -59,7 +59,6 @@ public class RefreshTokenServiceTest {
     void throwExceptionWhenRefreshTokenIsNotInRedis() {
         // when & then
         assertThatThrownBy(() -> refreshTokenService.getRefreshToken(UUID.randomUUID()))
-                .isInstanceOf(DomainException.class)
-                .hasMessage("해당 리프레시 토큰이 저장소에 존재하지 않습니다.");
+                .isInstanceOf(DomainException.class).hasMessage("리프레시 토큰이 저장소에 존재하지 않습니다.");
     }
 }
