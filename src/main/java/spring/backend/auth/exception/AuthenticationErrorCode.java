@@ -22,7 +22,9 @@ public enum AuthenticationErrorCode implements BaseErrorCode<DomainException> {
     ACCESS_TOKEN_NOT_ISSUED(HttpStatus.BAD_GATEWAY, "OAuth 써드파티 제공자에서 액세스 토큰이 발급되지 않았습니다."),
     NOT_EXIST_RESOURCE_RESPONSE(HttpStatus.BAD_GATEWAY, "OAuth 써드파티 리소스 서버에서 자원이 존재하지 않습니다."),
     RESOURCE_SERVER_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "OAuth Resource Server에 접근할 수 없습니다."),
-    UNSUPPORTED_REDIS_TIME_TYPE(HttpStatus.BAD_REQUEST, "Redis 만료시간은 ChronoUnit 타입이어야 합니다.");
+    UNSUPPORTED_REDIS_TIME_TYPE(HttpStatus.BAD_REQUEST, "Redis 만료시간은 ChronoUnit 타입이어야 합니다."),
+    MISMATCH_TOKEN_MEMBER(HttpStatus.UNAUTHORIZED, "토큰의 회원 ID와 요청한 회원 ID가 일치하지 않습니다."),
+    NOT_EXIST_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "리프레시 토큰이 저장소에 존재하지 않습니다.");
 
 
     private final HttpStatus httpStatus;

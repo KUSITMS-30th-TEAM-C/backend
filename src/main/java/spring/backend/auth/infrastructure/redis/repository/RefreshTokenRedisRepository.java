@@ -25,4 +25,9 @@ public class RefreshTokenRedisRepository implements RefreshTokenRepository {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         return valueOperations.get(memberId.toString());
     }
+
+    @Override
+    public void delete(UUID memberId) {
+        redisTemplate.delete(memberId.toString());
+    }
 }
