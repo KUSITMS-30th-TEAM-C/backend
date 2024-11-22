@@ -1,52 +1,50 @@
 package spring.backend.core.configuration.interceptor;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpMethod;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import spring.backend.auth.exception.AuthenticationErrorCode;
 import spring.backend.core.application.JwtService;
 
-import java.lang.annotation.Annotation;
-
 @Component
 @RequiredArgsConstructor
+@Log4j2
 public class AuthorizationInterceptor implements HandlerInterceptor {
-
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-
-    public static final String AUTHORIZATION_BEARER_PREFIX = "Bearer";
 
     private final JwtService jwtService;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (HttpMethod.OPTIONS.name().equals(request.getMethod())) {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        if (isOAuthLoginRequest(request)) {
             return true;
         }
-        String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
-        if (handler instanceof HandlerMethod) {
-            HandlerMethod handlerMethod = (HandlerMethod) handler;
-            Annotation authorizationAnnotation = handlerMethod.getMethodAnnotation(Authorization.class);
-            if (authorizationAnnotation != null) {
-                String token = extractToken(authorizationHeader);
-                jwtService.validateTokenExpiration(token);
-            }
+
+        String accessToken = extractToken(request);
+        if (accessToken == null) {
+            log.error("쿠키에 토큰이 존재하지 않습니다.");
+            throw AuthenticationErrorCode.NOT_EXIST_TOKEN.toException();
         }
+        jwtService.validateTokenExpiration(accessToken);
         return true;
     }
 
-    private String extractToken(String authorizationHeader) {
-        if (authorizationHeader == null) {
-            throw AuthenticationErrorCode.NOT_EXIST_HEADER.toException();
+    private boolean isOAuthLoginRequest(HttpServletRequest request) {
+        return request.getRequestURI().startsWith("/v1/oauth");
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("access_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
-        try {
-            return authorizationHeader.split(AUTHORIZATION_BEARER_PREFIX)[1].replace(" ", "");
-        } catch (Exception e) {
-            throw AuthenticationErrorCode.NOT_EXIST_TOKEN.toException();
-        }
+        return null;
     }
 }
