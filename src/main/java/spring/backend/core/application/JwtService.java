@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import spring.backend.auth.exception.AuthenticationErrorCode;
@@ -23,6 +24,7 @@ import java.util.UUID;
 
 
 @Service
+@Log4j2
 public class JwtService {
 
     @Getter
@@ -68,12 +70,16 @@ public class JwtService {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (SignatureException e) {
+            log.error("Invalid signature", e);
             throw AuthenticationErrorCode.INVALID_SIGNATURE.toException();
         } catch (ExpiredJwtException e) {
+            log.error("Expired token", e);
             throw AuthenticationErrorCode.EXPIRED_TOKEN.toException();
         } catch (MalformedJwtException e) {
+            log.error("Invalid token format", e);
             throw AuthenticationErrorCode.NOT_MATCH_TOKEN_FORMAT.toException();
         } catch (Exception e) {
+            log.error("Failed to parse token", e);
             throw AuthenticationErrorCode.NOT_DEFINE_TOKEN.toException();
         }
     }
@@ -86,6 +92,7 @@ public class JwtService {
     public void validateTokenExpiration(String token) {
         Claims claims = getPayload(token);
         if (claims.getExpiration().before(new Date())) {
+            log.error("Token has expired, token: {}", token);
             throw AuthenticationErrorCode.EXPIRED_TOKEN.toException();
         }
     }
@@ -101,5 +108,21 @@ public class JwtService {
                 .expiration(expiryDate)
                 .signWith(SECRET_KEY)
                 .compact();
+    }
+
+    public UUID extractMemberIdFromExpiredAccessToken(String invalidAccessToken) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(SECRET_KEY)
+                    .build()
+                    .parseSignedClaims(invalidAccessToken)
+                    .getPayload();
+            return UUID.fromString(claims.get("memberId", String.class));
+        } catch (ExpiredJwtException e) {
+            return UUID.fromString(e.getClaims().get("memberId", String.class));
+        } catch (Exception e) {
+            log.error("Failed to extract userId from invalid token", e);
+            throw AuthenticationErrorCode.FAILED_TO_EXTRACT_MEMBER_ID_FROM_EXPIRED_ACCESS_TOKEN.toException();
+        }
     }
 }
