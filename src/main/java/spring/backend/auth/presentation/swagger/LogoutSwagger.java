@@ -3,6 +3,7 @@ package spring.backend.auth.presentation.swagger;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
 import spring.backend.auth.exception.AuthenticationErrorCode;
 import spring.backend.core.configuration.swagger.ApiErrorCode;
 import spring.backend.core.exception.error.GlobalErrorCode;
@@ -16,6 +17,11 @@ public interface LogoutSwagger {
             description = "사용자의 로그아웃을 진행합니다. \n\n 로그아웃 시, 사용자의 토큰이 무효화되어, 다시 로그인을 진행해야 합니다.",
             operationId = "/v1/logout"
     )
-    @ApiErrorCode({GlobalErrorCode.class, AuthenticationErrorCode.class})
-    void logout(@Parameter(hidden = true) Member member);
+    @ApiErrorCode({
+            AuthenticationErrorCode.class
+    })
+    ResponseEntity<?> logout(
+            @Parameter(description = "쿠키에 있는 access_token", required = false)
+            String accessToken
+    );
 }
