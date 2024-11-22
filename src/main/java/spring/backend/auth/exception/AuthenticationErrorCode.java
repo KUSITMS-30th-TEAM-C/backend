@@ -11,7 +11,7 @@ import spring.backend.core.exception.error.BaseErrorCode;
 public enum AuthenticationErrorCode implements BaseErrorCode<DomainException> {
 
     NOT_EXIST_HEADER(HttpStatus.UNAUTHORIZED, "Authorization Header가 존재하지 않습니다."),
-    NOT_EXIST_TOKEN(HttpStatus.UNAUTHORIZED, "Authorization Header에 Token이 존재하지 않습니다."),
+    NOT_EXIST_TOKEN(HttpStatus.UNAUTHORIZED, "쿠키에 Token이 존재하지 않습니다."),
     NOT_MATCH_TOKEN_FORMAT(HttpStatus.UNAUTHORIZED, "토큰의 형식이 맞지 않습니다."),
     INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED, "토큰의 서명이 올바르지 않습니다."),
     NOT_DEFINE_TOKEN(HttpStatus.UNAUTHORIZED, "정의되지 않은 토큰입니다."),
@@ -28,7 +28,8 @@ public enum AuthenticationErrorCode implements BaseErrorCode<DomainException> {
     MISSING_COOKIE_VALUE(HttpStatus.BAD_REQUEST, "쿠키값이 존재하지 않습니다."),
     INVALID_MEMBER_SIGN_UP_CONDITION(HttpStatus.BAD_REQUEST, "회원가입을 위한 사용자 조건이 유효하지 않습니다."),
     NOT_EXIST_SIGN_UP_CONDITION(HttpStatus.BAD_REQUEST, "회원가입 요청이 유효하지 않습니다."),
-    INVALID_BIRTH_YEAR(HttpStatus.BAD_REQUEST, "출생년도는 현재 연도와 100년 전 사이여야 합니다.");
+    INVALID_BIRTH_YEAR(HttpStatus.BAD_REQUEST, "출생년도는 현재 연도와 100년 전 사이여야 합니다."),
+    FAILED_TO_EXTRACT_MEMBER_ID_FROM_EXPIRED_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "만료된 액세스 토큰에서 회원 ID를 추출하는데 실패했습니다.");
 
     private final HttpStatus httpStatus;
 
