@@ -49,9 +49,11 @@ public class HandleOAuthLoginService {
         CreateMemberWithOAuthRequest createMemberWithOAuthRequest = CreateMemberWithOAuthRequest.builder()
                 .provider(provider)
                 .email(oAuthResourceResponse.getEmail())
+                .nickname(oAuthResourceResponse.getName())
                 .build();
 
         Member member = createMemberWithOAuthService.createMemberWithOAuth(createMemberWithOAuthRequest);
-        return LoginResponse.of(jwtService.provideAccessToken(member), refreshTokenService.saveRefreshToken(member), member);
+        refreshTokenService.saveRefreshToken(member);
+        return new LoginResponse(jwtService.provideAccessToken(member),  member.getRole());
     }
 }
