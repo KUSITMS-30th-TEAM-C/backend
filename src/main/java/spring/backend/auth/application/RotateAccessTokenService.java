@@ -1,7 +1,7 @@
 package spring.backend.auth.application;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import spring.backend.auth.presentation.dto.response.RotateAccessTokenResponse;
 import spring.backend.auth.exception.AuthenticationErrorCode;
@@ -15,13 +15,15 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
+@Log4j2
 public class RotateAccessTokenService {
     private final MemberRepository memberRepository;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
 
-    public RotateAccessTokenResponse rotateAccessToken(String refreshToken) {
+    public RotateAccessTokenResponse rotateAccessToken(String invalidAccessToken) {
+        UUID memberIdFromInvalidAccessToken = jwtService.extractMemberIdFromExpiredAccessToken(invalidAccessToken);
+        String refreshToken = refreshTokenService.getRefreshToken(memberIdFromInvalidAccessToken);
         UUID memberId = extractMemberIdFromRefreshToken(refreshToken);
         validateRefreshToken(memberId, refreshToken);
         Member member = memberRepository.findById(memberId);
