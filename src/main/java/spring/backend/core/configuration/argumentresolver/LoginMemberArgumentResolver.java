@@ -24,6 +24,10 @@ import java.util.UUID;
 @Log4j2
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+
+    public static final String AUTHORIZATION_BEARER_PREFIX = "Bearer ";
+
     private final JwtService jwtService;
 
     private final MemberRepository memberRepository;
@@ -48,7 +52,15 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     private String extractToken(NativeWebRequest request) {
         HttpServletRequest httpRequest = request.getNativeRequest(HttpServletRequest.class);
+
         if (httpRequest != null) {
+            if (isSwaggerRequest(httpRequest)) {
+                String authHeader = httpRequest.getHeader(AUTHORIZATION_HEADER);
+                if (authHeader != null && authHeader.startsWith(AUTHORIZATION_BEARER_PREFIX)) {
+                    return authHeader.substring(7);
+                }
+            }
+
             Cookie[] cookies = httpRequest.getCookies();
             if (cookies != null) {
                 return Arrays.stream(cookies)
@@ -59,5 +71,10 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             }
         }
         return null;
+    }
+
+    private boolean isSwaggerRequest(HttpServletRequest request) {
+        String referer = request.getHeader("Referer");
+        return referer != null && referer.contains("/swagger-ui");
     }
 }
