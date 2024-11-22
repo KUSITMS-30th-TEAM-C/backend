@@ -38,6 +38,7 @@ public class RefreshTokenService {
             throw AuthenticationErrorCode.NOT_EXIST_REFRESH_TOKEN.toException();
         }
 
+        jwtService.getPayload(refreshToken);
         return refreshToken;
     }
 
