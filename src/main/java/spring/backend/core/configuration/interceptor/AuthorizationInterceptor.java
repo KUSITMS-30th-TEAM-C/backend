@@ -18,6 +18,10 @@ import java.util.List;
 @Log4j2
 public class AuthorizationInterceptor implements HandlerInterceptor {
 
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+
+    public static final String AUTHORIZATION_BEARER_PREFIX = "Bearer ";
+
     private final JwtService jwtService;
 
     private static final List<String> PASS_THROUGH_PATTERNS = Arrays.asList(
@@ -32,6 +36,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             return true;
         }
         String accessToken = extractToken(request);
+        log.info("accessToken: {}", accessToken);
         if (accessToken == null) {
             log.error("쿠키에 토큰이 존재하지 않습니다.");
             throw AuthenticationErrorCode.NOT_EXIST_TOKEN.toException();
@@ -45,15 +50,26 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
     }
 
     private String extractToken(HttpServletRequest request) {
+        if (isSwaggerRequest(request)) {
+            String authHeader = request.getHeader(AUTHORIZATION_HEADER);
+            if (authHeader != null && authHeader.startsWith(AUTHORIZATION_BEARER_PREFIX)) {
+                return authHeader.substring(7);
+            }
+        }
+
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                log.info("cookie: {}", cookie);
                 if ("access_token".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }
         }
         return null;
+    }
+
+    private boolean isSwaggerRequest(HttpServletRequest request) {
+        String referer = request.getHeader("Referer");
+        return referer != null && referer.contains("/swagger-ui");
     }
 }
