@@ -1,5 +1,7 @@
 package spring.backend.core.configuration.argumentresolver;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.MethodParameter;
@@ -8,12 +10,12 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import spring.backend.auth.exception.AuthenticationErrorCode;
 import spring.backend.core.application.JwtService;
 import spring.backend.member.domain.entity.Member;
 import spring.backend.member.domain.repository.MemberRepository;
 import spring.backend.member.exception.MemberErrorCode;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,10 +23,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Log4j2
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
-
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-
-    public static final String AUTHORIZATION_BEARER_PREFIX = "Bearer";
 
     private final JwtService jwtService;
 
@@ -37,21 +35,29 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        String authorizationHeader = webRequest.getHeader(AUTHORIZATION_HEADER);
-        String token = extractToken(authorizationHeader);
+        String token = extractToken(webRequest);
+        if (token == null) {
+            log.error("토큰이 존재하지 않습니다.");
+            throw new IllegalArgumentException("토큰이 존재하지 않습니다.");
+        }
+
         UUID memberId = jwtService.extractMemberId(token);
         Member member = memberRepository.findById(memberId);
         return Optional.ofNullable(member).orElseThrow(MemberErrorCode.NOT_EXIST_MEMBER::toException);
     }
 
-    private String extractToken(String authorizationHeader) {
-        if (authorizationHeader == null) {
-            throw AuthenticationErrorCode.NOT_EXIST_HEADER.toException();
+    private String extractToken(NativeWebRequest request) {
+        HttpServletRequest httpRequest = request.getNativeRequest(HttpServletRequest.class);
+        if (httpRequest != null) {
+            Cookie[] cookies = httpRequest.getCookies();
+            if (cookies != null) {
+                return Arrays.stream(cookies)
+                        .filter(cookie -> "access_token".equals(cookie.getName()))
+                        .findFirst()
+                        .map(Cookie::getValue)
+                        .orElse(null);
+            }
         }
-        try {
-            return authorizationHeader.split(AUTHORIZATION_BEARER_PREFIX)[1].replace(" ", "");
-        } catch (Exception e) {
-            throw AuthenticationErrorCode.NOT_EXIST_TOKEN.toException();
-        }
+        return null;
     }
 }
