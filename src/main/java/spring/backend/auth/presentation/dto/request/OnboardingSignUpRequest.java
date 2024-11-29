@@ -6,7 +6,7 @@ import spring.backend.member.domain.value.Gender;
 
 public record OnboardingSignUpRequest(
 
-        @Pattern(regexp = "^[a-zA-Z0-9가-힣]{1,6}$", message = "닉네임은 한글, 영문, 숫자 조합 6자 이내로 입력해주세요.")
+        @Pattern(regexp = "^[a-zA-Z0-9가-힣ㄱ-ㅎ]{1,6}$", message = "닉네임은 한글, 영문, 숫자 조합 6자 이내로 입력해주세요.")
         @Schema(description = "닉네임", example = "조각조각")
         String nickname,
 

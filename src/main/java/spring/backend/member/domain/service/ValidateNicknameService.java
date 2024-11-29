@@ -22,7 +22,7 @@ public class ValidateNicknameService {
             log.error("[ValidateNicknameService] Nickname is smaller than 6 characters");
             return false;
         }
-        if (!nickname.matches("^[a-zA-Z0-9가-힣]+$")) {
+        if (!nickname.matches("^[a-zA-Z0-9가-힣ㄱ-ㅎ]{1,6}$")) {
             log.error("[ValidateNicknameService] Nickname is invalid");
             return false;
         }
