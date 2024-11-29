@@ -42,7 +42,7 @@ class QuickStartRequestTest {
 
         @ParameterizedTest
         @DisplayName("올바른 형식의 이름일 경우 성공한다.")
-        @ValueSource(strings = {"등교", "이름테스트", "John Doe", "사용자1"})
+        @ValueSource(strings = {"등교", "이름테스트", "띄어쓰기 포함 10", "사용자1", "ㄱ", "ㄱ나다라ㅁ바사ㅇㅈㅋ"})
         void whenNameIsValid_thenValidationSucceeds(String name) {
             QuickStartRequest request = new QuickStartRequest(name, 12, 30, "오전", 300, Type.OFFLINE);
             Set<ConstraintViolation<QuickStartRequest>> violations = validator.validate(request);
@@ -58,7 +58,7 @@ class QuickStartRequestTest {
             Set<ConstraintViolation<QuickStartRequest>> violations = validator.validate(request);
 
             assertThat(violations).isNotEmpty();
-            assertThat(violations).anyMatch(violation -> violation.getMessage().contains("이름은 한글, 영문, 숫자 및 공백만 입력 가능하며"));
+            assertThat(violations).anyMatch(violation -> violation.getMessage().contains("이름은 한글(초성 포함), 영문, 숫자 및 공백만 입력 가능하며,"));
         }
 
         @Test

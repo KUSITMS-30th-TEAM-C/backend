@@ -7,7 +7,7 @@ import spring.backend.activity.domain.value.Type;
 public record QuickStartRequest(
 
         @NotNull(message = "이름은 필수 입력 항목입니다.")
-        @Pattern(regexp = "^(?!\\s)([a-zA-Z0-9가-힣]+(\\s[a-zA-Z0-9가-힣]+)*)?$", message = "이름은 한글, 영문, 숫자 및 공백만 입력 가능하며, 공백으로 시작하거나 끝날 수 없고, 연속된 공백이 없어야 합니다.")
+        @Pattern(regexp = "^(?!\\s)([a-zA-Z0-9가-힣ㄱ-ㅎ]+(\\s[a-zA-Z0-9가-힣ㄱ-ㅎ]+)*)?$", message = "이름은 한글(초성 포함), 영문, 숫자 및 공백만 입력 가능하며, 공백으로 시작하거나 끝날 수 없고, 연속된 공백이 없어야 합니다.")
         @Size(max = 10, message = "최대 10자까지 입력 가능합니다.")
         @Schema(description = "빠른 시작 이름", example = "등교")
         String name,
