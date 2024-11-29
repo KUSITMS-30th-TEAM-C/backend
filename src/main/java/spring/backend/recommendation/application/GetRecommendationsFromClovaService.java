@@ -2,6 +2,7 @@ package spring.backend.recommendation.application;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import spring.backend.activity.domain.value.Keyword;
 import spring.backend.activity.domain.value.Keyword.Category;
@@ -13,10 +14,7 @@ import spring.backend.recommendation.infrastructure.clova.dto.response.ClovaResp
 import spring.backend.recommendation.infrastructure.clova.exception.ClovaErrorCode;
 import spring.backend.recommendation.infrastructure.map.kakao.dto.response.KakaoMapResponse;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -35,6 +33,9 @@ public class GetRecommendationsFromClovaService {
     private static final Pattern KEYWORD_PREFIX_PATTERN = Pattern.compile(".*keyword\\s*:");
     private static final String LINE_SEPARATOR = "\n";
     private static final int ONLINE_AND_OFFLINE_RECOMMENDATION_COUNT = 3;
+
+    @Value("${kakao.map-uri}")
+    private String kakaoMapUri;
 
     private final RecommendationProvider<ClovaResponse> recommendationProvider;
     private final PlaceInfoProvider<KakaoMapResponse> kakaomapPlaceInfoProvider;
@@ -103,7 +104,11 @@ public class GetRecommendationsFromClovaService {
                     if (placeInfo.documents() != null && !placeInfo.documents().isEmpty()) {
                         mapx = placeInfo.documents().get(0).x();
                         mapy = placeInfo.documents().get(0).y();
-                        placeUrl = placeInfo.documents().get(0).placeUrl();
+                        if (placeInfo.documents().get(0).placeUrl().isEmpty()) {
+                            placeUrl = kakaoMapUri;
+                        } else {
+                            placeUrl = placeInfo.documents().get(0).placeUrl();
+                        }
                     }
 
                     i++;
@@ -138,7 +143,7 @@ public class GetRecommendationsFromClovaService {
 
         List<String> validKeywords = Arrays.stream(keywordText.split(","))
                 .map(String::trim)
-                .filter(this::isValidKeyword)
+                .map(this::getValidKeywordDescription)
                 .toList();
 
         if (validKeywords.isEmpty()) {
@@ -150,11 +155,23 @@ public class GetRecommendationsFromClovaService {
         return validKeywords.get(randomIdx);
     }
 
-    private boolean isValidKeyword(String keyword) {
-        return Arrays.stream(Keyword.Category.values())
-                .map(Keyword.Category::getDescription)
-                .collect(Collectors.toSet())
-                .contains(keyword.trim());
+    private String getValidKeywordDescription(String keyword) {
+        try {
+            Keyword.Category category = null;
+
+            if (Arrays.stream(Keyword.Category.values())
+                    .map(Enum::name)
+                    .anyMatch(name -> name.equalsIgnoreCase(keyword.trim()))) {
+                category = Keyword.Category.valueOf(keyword.trim().toUpperCase());
+            } else {
+                category = Keyword.Category.from(keyword.trim());
+            }
+
+            return category != null ? category.getDescription() : null;
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid keyword: {}", keyword, e);
+            return null;
+        }
     }
 
     private AIRecommendationRequest filteredValidRecommendations(AIRecommendationRequest clovaRecommendationRequest) {
