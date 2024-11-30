@@ -104,7 +104,7 @@ public class GetRecommendationsFromClovaService {
                     if (placeInfo.documents() != null && !placeInfo.documents().isEmpty()) {
                         mapx = placeInfo.documents().get(0).x();
                         mapy = placeInfo.documents().get(0).y();
-                        if (placeInfo.documents().get(0).placeUrl().isEmpty()) {
+                        if (Objects.equals(placeInfo.documents().get(0).placeUrl(), "")) {
                             placeUrl = kakaoMapUri;
                         } else {
                             placeUrl = placeInfo.documents().get(0).placeUrl();

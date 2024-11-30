@@ -16,6 +16,7 @@ public class ClovaStudioPrompt {
             1. 활동 타입이 OFFLINE, ONLINE_AND_OFFLINE일 경우:
                 - 입력된 활동 키워드, 시간 그리고 장소를 고려하여 다양한 오프라인 활동을 추천.
                 - 추천되는 활동의 플랫폼은 한국 지역을 추천.
+            2. 입력받은 장소에서 5km 이내에 있는 활동 또는 장소를 추천.
             ---
             활동 키워드별 정의와 예시:
             1. SELF_DEVELOPMENT
