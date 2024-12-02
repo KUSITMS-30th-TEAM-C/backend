@@ -123,8 +123,7 @@ public class GetRecommendationsFromClovaService {
                 Keyword keyword = null;
                 if (i + 1 < recommendations.length && KEYWORD_PREFIX_PATTERN.matcher(recommendations[i + 1].trim()).find()) {
                     String keywordText = KEYWORD_PREFIX_PATTERN.matcher(recommendations[i + 1].trim()).replaceFirst("").trim();
-                    String parsedKeywordText = parsedKeywordText(keywordText);
-                    Category category = convertClovaResponseKeywordToKeywordCategory(parsedKeywordText);
+                    Category category = parsedKeywordTextToCategory(keywordText);
                     keyword = Keyword.create(category, imageConverter.convertToImageUrl(category));
                     i++;
                 }
@@ -136,41 +135,36 @@ public class GetRecommendationsFromClovaService {
         return clovaResponses;
     }
 
-    private String parsedKeywordText(String keywordText) {
+    private Category parsedKeywordTextToCategory(String keywordText) {
         if (keywordText == null || keywordText.isEmpty()) {
             return null;
         }
 
-        List<String> validKeywords = Arrays.stream(keywordText.split(","))
+        List<Category> validKeywordCategories = Arrays.stream(keywordText.split(","))
                 .map(String::trim)
-                .map(this::getValidKeywordDescription)
+                .map(this::convertClovaResponseKeywordToKeywordCategory)
                 .toList();
 
-        if (validKeywords.isEmpty()) {
+        if (validKeywordCategories.isEmpty()) {
             return null;
         }
 
         RANDOM.setSeed(System.nanoTime());
-        int randomIdx = RANDOM.nextInt(validKeywords.size());
-        return validKeywords.get(randomIdx);
+        int randomIdx = RANDOM.nextInt(validKeywordCategories.size());
+        return validKeywordCategories.get(randomIdx);
     }
 
-    private String getValidKeywordDescription(String keyword) {
-        try {
-            Keyword.Category category = null;
-
-            if (Arrays.stream(Keyword.Category.values())
-                    .map(Enum::name)
-                    .anyMatch(name -> name.equalsIgnoreCase(keyword.trim()))) {
-                category = Keyword.Category.valueOf(keyword.trim().toUpperCase());
-            } else {
-                category = Keyword.Category.from(keyword.trim());
-            }
-
-            return category != null ? category.getDescription() : null;
-        } catch (IllegalArgumentException e) {
-            log.warn("Invalid keyword: {}", keyword, e);
+    private Category convertClovaResponseKeywordToKeywordCategory(String keywordText) {
+        if (keywordText == null || keywordText.isEmpty()) {
             return null;
+        }
+        try {
+            return Category.valueOf(keywordText.trim());
+        } catch (IllegalArgumentException e) {
+            return Arrays.stream(Category.values())
+                    .filter(category -> category.getDescription().equals(keywordText))
+                    .findFirst()
+                    .orElse(null);
         }
     }
 
@@ -228,17 +222,4 @@ public class GetRecommendationsFromClovaService {
         }
     }
 
-    private Category convertClovaResponseKeywordToKeywordCategory(String keywordText) {
-        if (keywordText == null || keywordText.isEmpty()) {
-            return null;
-        }
-        try {
-            return Category.valueOf(keywordText);
-        } catch (IllegalArgumentException e) {
-            return Arrays.stream(Category.values())
-                    .filter(category -> category.getDescription().equals(keywordText))
-                    .findFirst()
-                    .orElse(null);
-        }
-    }
 }
