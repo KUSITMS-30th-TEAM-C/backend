@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import spring.backend.auth.application.HandleOAuthLoginService;
 import spring.backend.auth.presentation.dto.response.LoginResponse;
 import spring.backend.core.presentation.RestResponse;
-import spring.backend.auth.dto.response.LoginResponse;
 
 @RestController
 @RequestMapping("/v1/oauth/login")
@@ -21,17 +20,22 @@ public class HandleOAuthLoginController {
     public ResponseEntity<?> handleOAuthLogin(@RequestParam(value = "code", required = false) String code,
                                               @RequestParam(value = "state", required = false) String state, @PathVariable String providerName) {
         LoginResponse loginResponse = handleOAuthLoginService.handleOAuthLogin(providerName, code, state);
+        // Todo: 배포 시 httpOnly(true)로 변경
         ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", loginResponse.accessToken())
-                .httpOnly(true)
+                .httpOnly(false)
+                .path("/")
                 .build();
-
-        ResponseCookie roleCookie = ResponseCookie.from("user_role", loginResponse.role().toString())
-                .httpOnly(true)
+        // Todo: 배포 시 httpOnly(true)로 변경
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", loginResponse.refreshToken())
+                .httpOnly(false)
+                .path("/")
                 .build();
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, roleCookie.toString())
-                .build();
+                .headers(header -> {
+                    header.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+                    header.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+                })
+                .body(new RestResponse<>(loginResponse.userInfo()));
     }
 }
