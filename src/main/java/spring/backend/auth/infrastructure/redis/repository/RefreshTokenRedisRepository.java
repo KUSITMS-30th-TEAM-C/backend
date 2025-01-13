@@ -19,10 +19,10 @@ public class RefreshTokenRedisRepository implements RefreshTokenRepository {
     private final RedisTemplate<String, String> redisTemplate;
 
     @Override
-    public void save(UUID memberId, String refreshToken, Long expireTime, TimeUnit timeUnit) {
+    public void save(String refreshToken, UUID memberId, Long expireTime, TimeUnit timeUnit) {
         try {
             ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-            valueOperations.set(memberId.toString(), refreshToken, expireTime, timeUnit);
+            valueOperations.set(refreshToken, memberId.toString(), expireTime, timeUnit);
         } catch (RedisConnectionException e) {
             log.error("Redis 연결 오류 : {}", e.getMessage());
             throw GlobalErrorCode.REDIS_CONNECTION_ERROR.toException();
@@ -32,23 +32,22 @@ public class RefreshTokenRedisRepository implements RefreshTokenRepository {
     }
 
     @Override
-    public String findByMemberId(UUID memberId) {
+    public String findByRefreshToken(String refreshToken) {
         try {
             ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-            return valueOperations.get(memberId.toString());
+            return valueOperations.get(refreshToken);
         } catch (RedisConnectionException e) {
             log.error("Redis 연결 오류 : {}", e.getMessage());
             throw GlobalErrorCode.REDIS_CONNECTION_ERROR.toException();
         } catch (Exception e) {
             throw GlobalErrorCode.INTERNAL_ERROR.toException();
         }
-
     }
 
     @Override
-    public void deleteByMemberId(UUID memberId) {
+    public void deleteByRefreshToken(String refreshToken) {
         try {
-            redisTemplate.delete(memberId.toString());
+            redisTemplate.delete(refreshToken);
         } catch (RedisConnectionException e) {
             log.error("Redis 연결 오류 : {}", e.getMessage());
             throw GlobalErrorCode.REDIS_CONNECTION_ERROR.toException();

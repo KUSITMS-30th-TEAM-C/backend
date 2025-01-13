@@ -9,7 +9,6 @@ import spring.backend.core.application.JwtService;
 import spring.backend.member.domain.entity.Member;
 
 import java.time.temporal.ChronoUnit;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -26,30 +25,25 @@ public class RefreshTokenService {
     }
 
     public String saveRefreshToken(Member member) {
-        refreshTokenRepository.save(member.getId(), jwtService.provideRefreshToken(member), REFRESH_TOKEN_EXPIRATION, convertChronoUnitToTimeUnit(ChronoUnit.DAYS));
-        return getRefreshToken(member.getId());
-    }
-
-    public String getRefreshToken(UUID memberId) {
-        String refreshToken = refreshTokenRepository.findByMemberId(memberId);
-
-        if (refreshToken == null || refreshToken.isEmpty()) {
-            log.error("리프레시 토큰이 저장소에 존재하지 않습니다.");
-            throw AuthenticationErrorCode.NOT_EXIST_REFRESH_TOKEN.toException();
-        }
-
-        jwtService.getPayload(refreshToken);
+        String refreshToken = jwtService.provideRefreshToken(member);
+        refreshTokenRepository.save(refreshToken, member.getId(), REFRESH_TOKEN_EXPIRATION, convertChronoUnitToTimeUnit(ChronoUnit.DAYS));
         return refreshToken;
     }
 
-    public void deleteRefreshToken(UUID memberId) {
-
-        if (refreshTokenRepository.findByMemberId(memberId) == null) {
-            log.error("memberId에 해당하는 리프레시 토큰이 저장소에 존재하지 않습니다.");
+    public void validateRefreshToken(String refreshToken) {
+        String savedRefreshToken = refreshTokenRepository.findByRefreshToken(refreshToken);
+        if (savedRefreshToken == null || savedRefreshToken.isEmpty()) {
             throw AuthenticationErrorCode.NOT_EXIST_REFRESH_TOKEN.toException();
         }
+        jwtService.getPayload(refreshToken);
+    }
 
-        refreshTokenRepository.deleteByMemberId(memberId);
+    public void deleteRefreshToken(String refreshToken) {
+        if (refreshTokenRepository.findByRefreshToken(refreshToken) == null) {
+            log.error("리프레시 토큰이 저장소에 존재하지 않습니다.");
+            throw AuthenticationErrorCode.NOT_EXIST_REFRESH_TOKEN.toException();
+        }
+        refreshTokenRepository.deleteByRefreshToken(refreshToken);
     }
 
     private TimeUnit convertChronoUnitToTimeUnit(ChronoUnit chronoUnit) {
