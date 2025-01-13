@@ -3,17 +3,17 @@ package spring.backend.auth.application;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
-import spring.backend.auth.presentation.dto.response.LoginResponse;
-import spring.backend.auth.presentation.dto.response.OAuthAccessTokenResponse;
-import spring.backend.auth.presentation.dto.response.OAuthResourceResponse;
 import spring.backend.auth.exception.AuthenticationErrorCode;
 import spring.backend.auth.infrastructure.OAuthRestClient;
 import spring.backend.auth.infrastructure.OAuthRestClientFactory;
-import spring.backend.member.domain.service.CreateMemberWithOAuthService;
+import spring.backend.auth.presentation.dto.response.LoginResponse;
+import spring.backend.auth.presentation.dto.response.OAuthAccessTokenResponse;
+import spring.backend.auth.presentation.dto.response.OAuthResourceResponse;
+import spring.backend.core.application.JwtService;
 import spring.backend.member.domain.entity.Member;
+import spring.backend.member.domain.service.CreateMemberWithOAuthService;
 import spring.backend.member.domain.value.Provider;
 import spring.backend.member.presentation.dto.request.CreateMemberWithOAuthRequest;
-import spring.backend.core.application.JwtService;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +54,6 @@ public class HandleOAuthLoginService {
 
         Member member = createMemberWithOAuthService.createMemberWithOAuth(createMemberWithOAuthRequest);
         refreshTokenService.saveRefreshToken(member);
-        return new LoginResponse(jwtService.provideAccessToken(member),  member.getRole());
+        return LoginResponse.of(jwtService.provideAccessToken(member), jwtService.provideRefreshToken(member), member);
     }
 }
