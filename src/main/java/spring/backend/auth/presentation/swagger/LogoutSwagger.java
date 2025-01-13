@@ -6,8 +6,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import spring.backend.auth.exception.AuthenticationErrorCode;
 import spring.backend.core.configuration.swagger.ApiErrorCode;
-import spring.backend.core.exception.error.GlobalErrorCode;
-import spring.backend.member.domain.entity.Member;
 
 @Tag(name = "Auth", description = "인증/인가")
 public interface LogoutSwagger {
@@ -22,6 +20,8 @@ public interface LogoutSwagger {
     })
     ResponseEntity<?> logout(
             @Parameter(description = "쿠키에 있는 access_token", required = false)
-            String accessToken
+            String accessToken,
+            @Parameter(description = "쿠키에 있는 refresh_token", required = false)
+            String refreshToken
     );
 }
