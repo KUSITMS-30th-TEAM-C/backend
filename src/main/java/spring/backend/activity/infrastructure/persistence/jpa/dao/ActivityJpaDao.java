@@ -98,7 +98,7 @@ public interface ActivityJpaDao extends JpaRepository<ActivityJpaEntity, Long>, 
     @Query("""
                 select new spring.backend.activity.dto.response.ActivityWithTitleAndSavedTimeResponse(
                     a.title,
-                    a.savedTime,
+                    coalesce(sum(a.savedTime), 0),
                     a.createdAt
                 )
                 from ActivityJpaEntity a

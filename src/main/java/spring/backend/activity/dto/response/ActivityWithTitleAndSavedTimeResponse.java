@@ -9,7 +9,7 @@ public record ActivityWithTitleAndSavedTimeResponse(
         String title,
 
         @Schema(description = "모은 시간", example = "60")
-        int savedTime,
+        long savedTime,
 
         @Schema(description = "활동 날짜", example = "2021-07-01T00:00:00")
         LocalDateTime dateOfActivity
