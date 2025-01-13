@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import spring.backend.auth.dto.response.RotateAccessTokenResponse;
+import spring.backend.auth.presentation.dto.response.RotateAccessTokenResponse;
 import spring.backend.core.configuration.swagger.ApiErrorCode;
 import spring.backend.core.presentation.RestResponse;
 import spring.backend.auth.exception.AuthenticationErrorCode;
@@ -19,7 +19,7 @@ public interface RotateAccessTokenSwagger {
     )
     @ApiErrorCode({GlobalErrorCode.class, AuthenticationErrorCode.class})
     ResponseEntity<RestResponse<RotateAccessTokenResponse>> rotateAccessToken(
-            @Parameter(description = "쿠키에 있는 만료된 access_token", required = false)
-            String accessToken
+            @Parameter(description = "쿠키에 있는 refresh_token", required = false)
+            String refreshToken
     );
 }
