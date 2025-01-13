@@ -24,7 +24,7 @@ public enum AuthenticationErrorCode implements BaseErrorCode<DomainException> {
     RESOURCE_SERVER_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "OAuth Resource Server에 접근할 수 없습니다."),
     UNSUPPORTED_REDIS_TIME_TYPE(HttpStatus.BAD_REQUEST, "Redis 만료시간은 ChronoUnit 타입이어야 합니다."),
     MISMATCH_TOKEN_MEMBER(HttpStatus.UNAUTHORIZED, "토큰의 회원 ID와 요청한 회원 ID가 일치하지 않습니다."),
-    NOT_EXIST_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "리프레시 토큰이 저장소에 존재하지 않습니다."),
+    NOT_EXIST_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 저장소에 존재하지 않습니다."),
     MISSING_COOKIE_VALUE(HttpStatus.BAD_REQUEST, "쿠키값이 존재하지 않습니다."),
     INVALID_MEMBER_SIGN_UP_CONDITION(HttpStatus.BAD_REQUEST, "회원가입을 위한 사용자 조건이 유효하지 않습니다."),
     NOT_EXIST_SIGN_UP_CONDITION(HttpStatus.BAD_REQUEST, "회원가입 요청이 유효하지 않습니다."),
