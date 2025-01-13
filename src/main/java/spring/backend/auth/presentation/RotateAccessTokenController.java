@@ -10,10 +10,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import spring.backend.auth.application.RotateAccessTokenService;
-import spring.backend.auth.dto.response.RotateAccessTokenResponse;
-import spring.backend.auth.presentation.swagger.RotateAccessTokenSwagger;
 import spring.backend.auth.presentation.dto.response.RotateAccessTokenResponse;
+import spring.backend.auth.presentation.swagger.RotateAccessTokenSwagger;
 import spring.backend.core.presentation.RestResponse;
+
+import static org.springframework.http.ResponseCookie.from;
 
 @RestController
 @RequestMapping("/v1/token/rotate")
@@ -24,16 +25,16 @@ public class RotateAccessTokenController implements RotateAccessTokenSwagger {
 
     @PostMapping
     public ResponseEntity<RestResponse<RotateAccessTokenResponse>> rotateAccessToken(
-            @CookieValue(name = "access_token", required = false) String accessToken
+            @CookieValue(name = "refresh_token", required = false) String refreshToken
     ) {
-        RotateAccessTokenResponse rotateAccessTokenResponse = rotateTokenService.rotateAccessToken(accessToken);
-        ResponseCookie cookie = ResponseCookie.from("access_token", rotateAccessTokenResponse.accessToken())
-                .httpOnly(true)
+        RotateAccessTokenResponse rotateAccessTokenResponse = rotateTokenService.rotateAccessToken(refreshToken);
+        ResponseCookie newAccessToken = from("access_token", rotateAccessTokenResponse.accessToken())
+                .httpOnly(false)
                 .path("/")
                 .build();
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .header(HttpHeaders.SET_COOKIE, newAccessToken.toString())
                 .build();
     }
 }
