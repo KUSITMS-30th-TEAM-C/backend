@@ -22,12 +22,12 @@ public class HandleOAuthLoginController {
         LoginResponse loginResponse = handleOAuthLoginService.handleOAuthLogin(providerName, code, state);
         // Todo: 배포 시 httpOnly(true)로 변경
         ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", loginResponse.accessToken())
-                .httpOnly(false)
+                .httpOnly(true)
                 .path("/")
                 .build();
         // Todo: 배포 시 httpOnly(true)로 변경
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", loginResponse.refreshToken())
-                .httpOnly(false)
+                .httpOnly(true)
                 .path("/")
                 .build();
 

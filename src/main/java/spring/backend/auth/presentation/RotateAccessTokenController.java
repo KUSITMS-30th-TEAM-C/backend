@@ -29,7 +29,7 @@ public class RotateAccessTokenController implements RotateAccessTokenSwagger {
     ) {
         RotateAccessTokenResponse rotateAccessTokenResponse = rotateTokenService.rotateAccessToken(refreshToken);
         ResponseCookie newAccessToken = from("access_token", rotateAccessTokenResponse.accessToken())
-                .httpOnly(false)
+                .httpOnly(true)
                 .path("/")
                 .build();
 
