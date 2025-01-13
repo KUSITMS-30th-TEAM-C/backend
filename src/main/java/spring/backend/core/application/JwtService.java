@@ -98,31 +98,23 @@ public class JwtService {
     }
 
     private String provideToken(String email, UUID id, Type type, long expiration) {
-        Date expiryDate = Date.from(Instant.now().plus(expiration, ChronoUnit.DAYS));
+        Date expiryDate;
+        Map<String, String> claims;
+        if (type.equals(Type.ACCESS)) {
+            expiryDate = Date.from(Instant.now().plus(expiration, ChronoUnit.SECONDS));
+            claims = Map.of(
+                    "memberId", id.toString(),
+                    "email", email,
+                    "type", type.getType());
+        } else {
+            expiryDate = Date.from(Instant.now().plus(expiration, ChronoUnit.DAYS));
+            claims = Map.of();
+        }
         return Jwts.builder()
-                .claims(Map.of(
-                        "memberId", id.toString(),
-                        "email", email,
-                        "type", type.getType()))
+                .claims(claims)
                 .issuedAt(new Date())
                 .expiration(expiryDate)
                 .signWith(SECRET_KEY)
                 .compact();
-    }
-
-    public UUID extractMemberIdFromExpiredAccessToken(String invalidAccessToken) {
-        try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(SECRET_KEY)
-                    .build()
-                    .parseSignedClaims(invalidAccessToken)
-                    .getPayload();
-            return UUID.fromString(claims.get("memberId", String.class));
-        } catch (ExpiredJwtException e) {
-            return UUID.fromString(e.getClaims().get("memberId", String.class));
-        } catch (Exception e) {
-            log.error("Failed to extract userId from invalid token", e);
-            throw AuthenticationErrorCode.FAILED_TO_EXTRACT_MEMBER_ID_FROM_EXPIRED_ACCESS_TOKEN.toException();
-        }
     }
 }
