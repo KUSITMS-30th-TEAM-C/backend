@@ -11,7 +11,7 @@ import spring.backend.core.exception.error.BaseErrorCode;
 public enum AuthenticationErrorCode implements BaseErrorCode<DomainException> {
 
     NOT_EXIST_HEADER(HttpStatus.UNAUTHORIZED, "Authorization Header가 존재하지 않습니다."),
-    NOT_EXIST_TOKEN(HttpStatus.UNAUTHORIZED, "쿠키에 Token이 존재하지 않습니다."),
+    NOT_EXIST_TOKEN_In_COOKIE(HttpStatus.UNAUTHORIZED, "쿠키에 Token이 존재하지 않습니다."),
     NOT_MATCH_TOKEN_FORMAT(HttpStatus.UNAUTHORIZED, "토큰의 형식이 맞지 않습니다."),
     INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED, "토큰의 서명이 올바르지 않습니다."),
     NOT_DEFINE_TOKEN(HttpStatus.UNAUTHORIZED, "정의되지 않은 토큰입니다."),
