@@ -65,22 +65,6 @@ public class LoginMemberArgumentResolverTest {
         Assertions.assertTrue(loginMemberArgumentResolver.supportsParameter(parameter));
     }
 
-//    @DisplayName("Authorization 헤더에 유효한 토큰이 있을 때 Member 객체를 반환한다")
-//    @Test
-//    public void returnsMemberObject_whenAuthorizationHeaderIsProvided() throws Exception {
-//        // when
-//        MethodParameter parameter = mock(MethodParameter.class);
-//        when(parameter.hasParameterAnnotation(LoginMember.class)).thenReturn(true);
-//        when(webRequest.getHeader("Authorization")).thenReturn("Bearer " + token);
-//        when(jwtService.extractMemberId(any(String.class))).thenReturn(memberId);
-//        when(memberRepository.findById(memberId)).thenReturn(member);
-//
-//        // then
-//        Object result = loginMemberArgumentResolver.resolveArgument(parameter, mavContainer, webRequest, null);
-//        assertNotNull(result);
-//        assertThat(result).isEqualTo(member);
-//    }
-
     @DisplayName("쿠키에 유효한 토큰이 있을 때 Member 객체를 반환한다")
     @Test
     public void returnsMemberObject_whenValidTokenInCookie() throws Exception {

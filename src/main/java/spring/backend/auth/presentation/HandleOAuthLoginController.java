@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import spring.backend.auth.application.HandleOAuthLoginService;
 import spring.backend.auth.presentation.dto.response.LoginResponse;
+import spring.backend.auth.presentation.dto.response.LoginUserInfoResponse;
 import spring.backend.core.presentation.RestResponse;
 
 @RestController
@@ -17,25 +18,25 @@ public class HandleOAuthLoginController {
     private final HandleOAuthLoginService handleOAuthLoginService;
 
     @GetMapping("/{providerName}")
-    public ResponseEntity<?> handleOAuthLogin(@RequestParam(value = "code", required = false) String code,
-                                              @RequestParam(value = "state", required = false) String state, @PathVariable String providerName) {
+    public ResponseEntity<RestResponse<LoginUserInfoResponse>> handleOAuthLogin(@RequestParam(value = "code", required = false) String code,
+                                                                                @RequestParam(value = "state", required = false) String state, @PathVariable String providerName) {
         LoginResponse loginResponse = handleOAuthLoginService.handleOAuthLogin(providerName, code, state);
-        // Todo: 배포 시 httpOnly(true)로 변경
         ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", loginResponse.accessToken())
                 .httpOnly(true)
                 .path("/")
                 .build();
-        // Todo: 배포 시 httpOnly(true)로 변경
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", loginResponse.refreshToken())
                 .httpOnly(true)
                 .path("/")
                 .build();
+
+        LoginUserInfoResponse loginUserInfoResponse = LoginUserInfoResponse.from(loginResponse);
 
         return ResponseEntity.ok()
                 .headers(header -> {
                     header.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
                     header.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
                 })
-                .body(new RestResponse<>(loginResponse.userInfo()));
+                .body(new RestResponse<>(loginUserInfoResponse));
     }
 }
