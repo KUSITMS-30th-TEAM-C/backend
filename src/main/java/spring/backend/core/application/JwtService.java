@@ -100,7 +100,7 @@ public class JwtService {
     private String provideToken(String email, UUID id, Type type, long expiration) {
         Date expiryDate;
         Map<String, String> claims;
-        if (type.equals(Type.ACCESS)) {
+        if (type == Type.ACCESS) {
             expiryDate = Date.from(Instant.now().plus(expiration, ChronoUnit.SECONDS));
             claims = Map.of(
                     "memberId", id.toString(),
