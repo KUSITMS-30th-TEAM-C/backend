@@ -4,7 +4,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public interface RefreshTokenRepository {
-    void save(String refreshToken,UUID memberId, Long expireTime, TimeUnit timeUnit);
+    void save(String refreshToken, UUID memberId, Long expireTime, TimeUnit timeUnit);
     String findByRefreshToken(String refreshToken);
     void deleteByRefreshToken(String refreshToken);
 }
