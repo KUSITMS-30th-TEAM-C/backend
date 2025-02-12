@@ -39,7 +39,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         log.info("accessToken: {}", accessToken);
         if (accessToken == null) {
             log.error("쿠키에 토큰이 존재하지 않습니다.");
-            throw AuthenticationErrorCode.NOT_EXIST_TOKEN.toException();
+            throw AuthenticationErrorCode.NOT_EXIST_TOKEN_In_COOKIE.toException();
         }
         jwtService.validateTokenExpiration(accessToken);
         return true;
