@@ -49,7 +49,6 @@ public class HandleOAuthLoginService {
         CreateMemberWithOAuthRequest createMemberWithOAuthRequest = CreateMemberWithOAuthRequest.builder()
                 .provider(provider)
                 .email(oAuthResourceResponse.getEmail())
-                .nickname(oAuthResourceResponse.getName())
                 .build();
 
         Member member = createMemberWithOAuthService.createMemberWithOAuth(createMemberWithOAuthRequest);
