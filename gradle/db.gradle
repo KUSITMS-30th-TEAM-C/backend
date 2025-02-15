@@ -2,6 +2,7 @@ dependencies {
     // DB, JPA
     runtimeOnly 'com.mysql:mysql-connector-j'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'com.maxmind.geoip2:geoip2:4.1.0'
 
     testImplementation 'com.h2database:h2'
 
