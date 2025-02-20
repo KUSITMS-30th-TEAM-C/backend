@@ -29,6 +29,7 @@ public enum AuthenticationErrorCode implements BaseErrorCode<DomainException> {
     INVALID_MEMBER_SIGN_UP_CONDITION(HttpStatus.BAD_REQUEST, "회원가입을 위한 사용자 조건이 유효하지 않습니다."),
     NOT_EXIST_SIGN_UP_CONDITION(HttpStatus.BAD_REQUEST, "회원가입 요청이 유효하지 않습니다."),
     INVALID_BIRTH_YEAR(HttpStatus.BAD_REQUEST, "출생년도는 현재 연도와 100년 전 사이여야 합니다."),
+    TOKEN_ROTATE_ATTEMPT_FROM_100KM(HttpStatus.UNAUTHORIZED, "100km 이상 떨어진 위치에서 토큰 재발급을 시도했습니다."),
     FAILED_TO_EXTRACT_MEMBER_ID_FROM_EXPIRED_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "만료된 액세스 토큰에서 회원 ID를 추출하는데 실패했습니다.");
 
     private final HttpStatus httpStatus;
