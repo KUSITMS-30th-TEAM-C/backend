@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import spring.backend.auth.application.HandleOAuthLoginService;
 import spring.backend.auth.presentation.dto.response.LoginResponse;
 import spring.backend.auth.presentation.dto.response.LoginUserInfoResponse;
+import spring.backend.core.configuration.argumentresolver.ClientIp;
 import spring.backend.core.presentation.RestResponse;
 
 @RestController
@@ -19,8 +20,8 @@ public class HandleOAuthLoginController {
 
     @GetMapping("/{providerName}")
     public ResponseEntity<RestResponse<LoginUserInfoResponse>> handleOAuthLogin(@RequestParam(value = "code", required = false) String code,
-                                                                                @RequestParam(value = "state", required = false) String state, @PathVariable String providerName) {
-        LoginResponse loginResponse = handleOAuthLoginService.handleOAuthLogin(providerName, code, state);
+                                                                                @RequestParam(value = "state", required = false) String state, @PathVariable String providerName, @ClientIp String ip) {
+        LoginResponse loginResponse = handleOAuthLoginService.handleOAuthLogin(providerName, code, state, ip);
         ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", loginResponse.accessToken())
                 .httpOnly(true)
                 .path("/")
