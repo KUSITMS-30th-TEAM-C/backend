@@ -55,4 +55,17 @@ public class RefreshTokenRedisRepository implements RefreshTokenRepository {
             throw GlobalErrorCode.INTERNAL_ERROR.toException();
         }
     }
+
+    @Override
+    public void deleteAll() {
+        try {
+            redisTemplate.getConnectionFactory().getConnection().flushDb();
+        } catch (RedisConnectionException e) {
+            log.error("Redis 연결 오류 : {}", e.getMessage());
+            throw GlobalErrorCode.REDIS_CONNECTION_ERROR.toException();
+        } catch (Exception e) {
+            throw GlobalErrorCode.INTERNAL_ERROR.toException();
+        }
+    }
+
 }
