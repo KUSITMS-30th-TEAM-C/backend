@@ -26,6 +26,9 @@ public class RefreshTokenServiceTest {
     @Autowired
     private RefreshTokenRedisRepository refreshTokenRedisRepository;
 
+    @Autowired
+    private JwtService jwtService;
+
     private final UUID memberId = UUID.randomUUID();
 
     private final Member member = Member.builder()
@@ -56,7 +59,8 @@ public class RefreshTokenServiceTest {
     @Test
     void saveRefreshTokenWhenTokenReleased() {
         // when
-        String refreshToken = refreshTokenService.saveRefreshToken(member);
+        String refreshToken = jwtService.provideRefreshToken(member, "");
+        refreshTokenService.saveRefreshToken(refreshToken, member);
         // then
         assertThat(member.getId().toString()).isEqualTo(refreshTokenRedisRepository.findByRefreshToken(refreshToken));
     }
