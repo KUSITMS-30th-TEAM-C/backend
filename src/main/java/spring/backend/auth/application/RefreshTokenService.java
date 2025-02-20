@@ -24,10 +24,8 @@ public class RefreshTokenService {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    public String saveRefreshToken(Member member) {
-        String refreshToken = jwtService.provideRefreshToken(member);
+    public void saveRefreshToken(String refreshToken, Member member) {
         refreshTokenRepository.save(refreshToken, member.getId(), REFRESH_TOKEN_EXPIRATION, convertChronoUnitToTimeUnit(ChronoUnit.DAYS));
-        return refreshToken;
     }
 
     public void validateRefreshToken(String refreshToken) {
