@@ -28,7 +28,7 @@ public class HandleOAuthLoginService {
 
     private final RefreshTokenService refreshTokenService;
 
-    public LoginResponse handleOAuthLogin(String providerName, String code, String state) {
+    public LoginResponse handleOAuthLogin(String providerName, String code, String state, String ip) {
         if (providerName == null || providerName.isEmpty()) {
             throw AuthenticationErrorCode.NOT_EXIST_PROVIDER.toException();
         }
@@ -36,11 +36,14 @@ public class HandleOAuthLoginService {
         OAuthRestClient oAuthRestClient = oAuthRestClientFactory.getOAuthRestClient(provider);
 
         OAuthAccessTokenResponse oAuthAccessTokenResponse = oAuthRestClient.getAccessToken(code, state);
+
         if (oAuthAccessTokenResponse == null) {
             log.error("[HandleOAuthLoginService] OAuth access token could not be retrieved.");
             throw AuthenticationErrorCode.ACCESS_TOKEN_NOT_ISSUED.toException();
         }
+
         OAuthResourceResponse oAuthResourceResponse = oAuthRestClient.getResource(oAuthAccessTokenResponse.getAccessToken());
+
         if (oAuthResourceResponse == null) {
             log.error("[HandleOAuthLoginService] OAuth resource could not be retrieved.");
             throw AuthenticationErrorCode.RESOURCE_SERVER_UNAVAILABLE.toException();
@@ -52,7 +55,9 @@ public class HandleOAuthLoginService {
                 .build();
 
         Member member = createMemberWithOAuthService.createMemberWithOAuth(createMemberWithOAuthRequest);
-        refreshTokenService.saveRefreshToken(member);
-        return LoginResponse.of(jwtService.provideAccessToken(member), jwtService.provideRefreshToken(member), member);
+        String accessToken = jwtService.provideAccessToken(member);
+        String refreshToken = jwtService.provideRefreshToken(member, ip);
+        refreshTokenService.saveRefreshToken(refreshToken, member);
+        return LoginResponse.of(accessToken, refreshToken, member);
     }
 }
