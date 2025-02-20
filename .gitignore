@@ -38,4 +38,5 @@ out/
 
 ### Configuration ###
 src/main/resources/application-*.yml
+src/main/resources/maxmind
 src/test/resources/application.yml
