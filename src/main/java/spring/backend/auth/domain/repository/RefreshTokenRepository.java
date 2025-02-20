@@ -7,4 +7,5 @@ public interface RefreshTokenRepository {
     void save(String refreshToken, UUID memberId, Long expireTime, TimeUnit timeUnit);
     String findByRefreshToken(String refreshToken);
     void deleteByRefreshToken(String refreshToken);
+    void deleteAll();
 }
