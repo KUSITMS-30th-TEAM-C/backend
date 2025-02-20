@@ -49,16 +49,18 @@ public class JwtService {
                 member.getEmail(),
                 member.getId(),
                 Type.ACCESS,
-                ACCESS_EXPIRATION
+                ACCESS_EXPIRATION,
+                ""
         );
     }
 
-    public String provideRefreshToken(Member member) {
+    public String provideRefreshToken(Member member, String ip) {
         return provideToken(
                 member.getEmail(),
                 member.getId(),
                 Type.REFRESH,
-                REFRESH_EXPIRATION
+                REFRESH_EXPIRATION,
+                ip
         );
     }
 
@@ -97,18 +99,20 @@ public class JwtService {
         }
     }
 
-    private String provideToken(String email, UUID id, Type type, long expiration) {
+    private String provideToken(String email, UUID id, Type type, long expiration, String ip) {
         Date expiryDate;
         Map<String, String> claims;
         if (type == Type.ACCESS) {
             expiryDate = Date.from(Instant.now().plus(expiration, ChronoUnit.SECONDS));
             claims = Map.of(
                     "memberId", id.toString(),
-                    "email", email,
-                    "type", type.getType());
+                    "email", email
+            );
         } else {
             expiryDate = Date.from(Instant.now().plus(expiration, ChronoUnit.DAYS));
-            claims = Map.of();
+            claims = Map.of(
+                    "ip", ip
+            );
         }
         return Jwts.builder()
                 .claims(claims)
