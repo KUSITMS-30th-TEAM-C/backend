@@ -35,8 +35,8 @@ public class RotateAccessTokenService {
 
         if (geoLocationService.checkUserLocation(newIp, savedIp)) {
             refreshTokenService.deleteRefreshToken(refreshToken);
-            log.error("100km 밖에서 토큰 재발급을 시도했습니다.");
-            throw AuthenticationErrorCode.TOKEN_ROTATE_ATTEMPT_FROM_100KM.toException();
+            log.error("유효하지 않은 위치에서 토큰 재발급을 시도했습니다.");
+            throw AuthenticationErrorCode.TOKEN_ROTATE_ATTEMPT_FROM_INVALID_LOCATION.toException();
         }
 
         UUID memberId = UUID.fromString(refreshTokenRedisRepository.findByRefreshToken(refreshToken));
