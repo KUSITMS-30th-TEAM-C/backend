@@ -89,6 +89,6 @@ public class RotateAccessTokenServiceTest {
         refreshTokenService.saveRefreshToken(refreshToken, member);
         // when, then
         DomainException ex = assertThrows(DomainException.class, () -> rotateAccessTokenService.rotateToken(refreshToken, newIp), "100km 밖에서 토큰 재발급을 시도했습니다.");
-        assertThat(ex.getCode()).isEqualTo(AuthenticationErrorCode.TOKEN_ROTATE_ATTEMPT_FROM_100KM.name());
+        assertThat(ex.getCode()).isEqualTo(AuthenticationErrorCode.TOKEN_ROTATE_ATTEMPT_FROM_INVALID_LOCATION.name());
     }
 }
