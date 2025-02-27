@@ -24,10 +24,14 @@ public class HandleOAuthLoginController {
         LoginResponse loginResponse = handleOAuthLoginService.handleOAuthLogin(providerName, code, state, ip);
         ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", loginResponse.accessToken())
                 .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
                 .path("/")
                 .build();
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", loginResponse.refreshToken())
                 .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
                 .path("/")
                 .build();
 

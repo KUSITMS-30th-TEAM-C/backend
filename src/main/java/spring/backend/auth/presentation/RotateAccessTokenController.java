@@ -35,11 +35,15 @@ public class RotateAccessTokenController implements RotateTokenSwagger {
         RotateTokenResponse rotateTokenResponse = rotateTokenService.rotateToken(refreshToken, ip);
         ResponseCookie newAccessToken = from("access_token", rotateTokenResponse.accessToken())
                 .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
                 .path("/")
                 .build();
 
         ResponseCookie newRefreshToken = from("refresh_token", rotateTokenResponse.refreshToken())
                 .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
                 .path("/")
                 .build();
 
