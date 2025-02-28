@@ -3,6 +3,7 @@ package spring.backend.auth.presentation;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -17,15 +18,28 @@ import spring.backend.core.configuration.argumentresolver.ClientIp;
 import spring.backend.core.presentation.RestResponse;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import static org.springframework.http.ResponseCookie.from;
 
 @RestController
 @RequestMapping("/v1/token/rotate")
-@RequiredArgsConstructor
 @Log4j2
 public class RotateAccessTokenController implements RotateTokenSwagger {
+
     private final RotateAccessTokenService rotateTokenService;
+    private final long ACCESS_EXPIRATION;
+    private final long REFRESH_EXPIRATION;
+
+    public RotateAccessTokenController(RotateAccessTokenService rotateTokenService,
+                                       @Value("${jwt.access-token-expiry}") long accessTokenExpiry,
+                                       @Value("${jwt.refresh-token-expiry}") long refreshTokenExpiry
+    ) {
+        this.rotateTokenService = rotateTokenService;
+        this.ACCESS_EXPIRATION = accessTokenExpiry;
+        this.REFRESH_EXPIRATION = refreshTokenExpiry;
+    }
+
 
     @PostMapping
     public ResponseEntity<RestResponse<RotateTokenResponse>> rotateToken(
@@ -37,6 +51,7 @@ public class RotateAccessTokenController implements RotateTokenSwagger {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
+                .maxAge(Duration.ofSeconds(ACCESS_EXPIRATION))
                 .path("/")
                 .build();
 
@@ -44,6 +59,7 @@ public class RotateAccessTokenController implements RotateTokenSwagger {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
+                .maxAge(Duration.ofDays(REFRESH_EXPIRATION))
                 .path("/")
                 .build();
 
